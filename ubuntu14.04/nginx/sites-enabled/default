@@ -1,0 +1,26 @@
+server {
+    listen 80 default_server;
+    #listen [::]:80 default_server ipv6only=on;
+
+    root /www/api/application;
+    index index.php index.html index.htm;
+
+    server_name localhost;
+
+    location ~ \.php$ {
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_pass unix:/var/run/php5-fpm.sock;
+        #fastcgi_pass 127.0.0.1:9000;
+        fastcgi_index index.php;
+        include fastcgi_params;
+    }
+
+    if (!-e $request_filename) {
+        rewrite /v2d5/(.*)$ /v2d5/index.php?$1 last;
+        rewrite /(.*)$ /legacy/index.php?$1 last;
+        #rewrite /(.*)$ /index.php?$1 last;
+        break;
+    }
+
+}

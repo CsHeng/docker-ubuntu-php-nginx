@@ -16,16 +16,15 @@ $ vim Dockerfile
 ```
 3. 由于我们是基于Ubuntu14.04做的镜像，所以定义好官方Ubuntu地址即可，在Dockerfile插入:`FROM ubuntu:trusty`，保存Dockerfile，然后运行`docker build -t ubuntu:14.04-php-nginx .`，如果你是第一次运行，需要从上面修改的docker源拉取ubuntu的镜像，会比较久。
 
-![](media/14956799088514/14956931611685.jpg)
-
+![](/images/14956931611685.jpg)
 
 4. 我们用`docker images`来看结果，会有两个镜像，一个是拉下来的`ubuntu:trusty`，一个是我们定制的镜像: `ubuntu:14.04-php-nginx`
 
-![](media/14956799088514/14956932635561.jpg)
+![](/images/14956932635561.jpg)
 
 5. 现在我们已经拥有一个本地image，使用**交互模式**启动容器准备进行定制 `docker run -t -i ubuntu:14.04-php-nginx /bin/bash`
 
-![](media/14956799088514/14956933269280.jpg)
+![](/images/14956933269280.jpg)
 
 6. 把它当成一台装了Ubuntu的虚拟机，该怎么样怎么样，我们准备安装PHP-FPM和Nginx及一些PHP扩展，那么正常命令是这样的：(容器以root用户登录，且默认没有sudo命令，则不需要sudo)
 ```
@@ -41,7 +40,7 @@ dpkg-reconfigure -f noninteractive tzdata
 ```
 成功之后会输出当前的`local time`
 
-![](media/14956799088514/14956933774657.jpg)
+![](/images/14956933774657.jpg)
 
 8. 接下来我们不需要再安装其他软件了，那么可以删掉没有必要的apt缓存：`rm -rf /var/lib/apt/list/*`
 9. 由于docker是无状态的，且启动时只能保留一条`RUN`来执行我们要启动的命令，但是我们需要FPM和Nginx都一起启动，怎么办？于是我们通过`supervisor`来控制，那么我们需要配置`supervisor`：
@@ -131,6 +130,6 @@ CMD ["/usr/bin/supervisord", "-n", "-c",  "/etc/supervisor/supervisord.conf"]
 
 [1]: https://www.docker.com/
 [2]: https://c.163.com/wiki/index.php?title=DockerHub%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F
-[3]: https://github.com/CsHeng/docker-ubuntu-php-nginx
+[3]: https://yeasy.gitbooks.io/docker_practice/content/introduction/
 [4]: https://yeasy.gitbooks.io/docker_practice/content/introduction/
 

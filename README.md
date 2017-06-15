@@ -29,7 +29,10 @@ $ vim Dockerfile
 6. 把它当成一台装了Ubuntu的虚拟机，该怎么样怎么样，我们准备安装PHP-FPM和Nginx及一些PHP扩展，那么正常命令是这样的：(容器以root用户登录，且默认没有sudo命令，则不需要sudo)
 ```
 apt-get update 
-apt-get install -y nginx nginx php5 php5-fpm php5-mongo php5-redis php5-gd php5-curl php5-mcrypt imagemagick php5-imagick supervisor
+apt-get install -y nginx nginx php5 php5-fpm php-pear php5-dev php5-redis php5-gd php5-curl php5-mcrypt imagemagick php5-imagick supervisor
+pecl install mongo
+echo 'extension=mongo.so' > /etc/php5/mods-available/mongo.ini 
+ln -s /etc/php5/mods-available/mongo.ini /etc/php5/fpm/conf.d/20-mongo.ini 
 ```
 漫长的等待时间之后，安装完了
 7. 由于默认的系统是UTC时间，我们将它改为CST
@@ -75,18 +78,21 @@ FROM ubuntu:trusty
 # 更换apt源
 RUN sed -i 's/http:\/\/archive\.ubuntu\.com\/ubuntu\//http:\/\/cn\.archive\.ubuntu\.com\/ubuntu\//g' /etc/apt/sources.list \
     && apt-get update \
-    && apt-get install -y nginx php5 php5-fpm php5-mongo php5-redis php5-gd php5-curl php5-mcrypt imagemagick php5-imagick supervisor \
+    && apt-get install -y nginx php5 php5-fpm php-pear php5-dev php5-redis php5-gd php5-curl php5-mcrypt imagemagick php5-imagick supervisor \
+    && pecl install mongo \
     && rm /etc/localtime \
     && echo "Asia/Shanghai" > /etc/timezone \
     && dpkg-reconfigure -f noninteractive tzdata \
     # remove caches
     && rm -rf /var/lib/apt/lists/* \
+    && echo 'extension=mongo.so' > /etc/php5/mods-available/mongo.ini \
+    && ln -s /etc/php5/mods-available/mongo.ini /etc/php5/fpm/conf.d/20-mongo.ini \
     # add supervisord conf before CMD
     && mkdir -p /etc/supervisor/conf.d \
     && echo '[supervisord] \nnodaemon=true' > /etc/supervisor/conf.d/supervisord.conf \
     && echo '[program:nginx] \ncommand=/usr/sbin/nginx \nautostart=true \nautorestart=true \npriority=10' > /etc/supervisor/conf.d/nginx.conf \
     && echo '[program:php-fpm] \ncommand=/usr/sbin/php5-fpm \nautostart=true \nautorestart=true \npriority=5' > /etc/supervisor/conf.d/php-fpm.conf
-
+    
 CMD ["/usr/bin/supervisord", "-n", "-c",  "/etc/supervisor/supervisord.conf"]
 
 ```
@@ -130,6 +136,6 @@ CMD ["/usr/bin/supervisord", "-n", "-c",  "/etc/supervisor/supervisord.conf"]
 
 [1]: https://www.docker.com/
 [2]: https://c.163.com/wiki/index.php?title=DockerHub%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F
-[3]: https://yeasy.gitbooks.io/docker_practice/content/introduction/
+[3]: https://github.com/CsHeng/docker-ubuntu-php-nginx
 [4]: https://yeasy.gitbooks.io/docker_practice/content/introduction/
 
